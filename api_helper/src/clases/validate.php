@@ -24,14 +24,14 @@ class validated extends Database {
 		// $debug = [];
 		try {
 
-			$info = $this->getToken();
-			// $debug["getToken"]["res"] = $info;
-			// $debug["getToken"]["res"]     = $info->getMessage();
-			// $debug["getToken"]["type of"] = gettype($info);
+			$info = $this->getToken_JWT();
+			// $debug["getToken_JWT"]["res"] = $info;
+			// $debug["getToken_JWT"]["res"]     = $info->getMessage();
+			// $debug["getToken_JWT"]["type of"] = gettype($info);
 
 			$this->are_info_valid($info);
 
-			$query = "SELECT * FROM $this->main_table WHERE " . $this->cols["id"] . " = :id";
+			$query = "SELECT * FROM $this->main_table WHERE ".$this->cols["id"]." = :id";
 			// $debug["query"] = $query;
 
 			$stm = $this->conn->prepare($query);
@@ -54,26 +54,30 @@ class validated extends Database {
 			return $res;
 		}
 	}
-	private function getToken(): object {
+	/**
+	 * @return object
+	 * @version 1.1.0
+	 */
+	private function getToken_JWT(): object {
 		try {
 			$hea = apache_request_headers();
 			// $debug["hea apache"] = $hea;
 			// echo json_encode($debug);
 
-			if (!isset($hea["Authorization"]) || empty($hea["Authorization"])) {
+			if(!isset($hea["Authorization"]) || empty($hea["Authorization"])) {
 				throw new Exception("Seriedad por favor");
 			}
 
 			$token_arr = explode(" ", $hea["Authorization"]);
-			// $debug["getToken"]["explode"] = $token_arr;
+			// $debug["getToken_JWT"]["explode"] = $token_arr;
 
-			if (!is_array($token_arr)) {
+			if(!is_array($token_arr)) {
 				throw new Exception("Falta info");
 			}
-			if (count($token_arr) !== 2) {
+			if(count($token_arr) !== 2) {
 				throw new Exception("Ya wey por favor");
 			}
-			if ($token_arr[0] !== "Baerer") {
+			if($token_arr[0] !== "Baerer") {
 				throw new Exception("porque buscas mi desgracia?");
 			}
 			$token = $token_arr[1];
@@ -81,8 +85,8 @@ class validated extends Database {
 			$decoded = JWT::decode($token, new Key(API_KEY, ALGORITHM));
 			// $decoded = JWT::decode($token, API_KEY, ALGORITHM);
 
-			// $debug["getToken"]["decoded"]["data"]    = $decoded;
-			// $debug["getToken"]["decoded"]["type of"] = gettype($decoded);
+			// $debug["getToken_JWT"]["decoded"]["data"]    = $decoded;
+			// $debug["getToken_JWT"]["decoded"]["type of"] = gettype($decoded);
 
 			// return $debug;
 			// $decoded->debug = $debug;
@@ -93,10 +97,10 @@ class validated extends Database {
 		}
 	}
 	private function are_info_valid($info): void {
-		if (!is_object($info)) {
+		if(!is_object($info)) {
 			throw new Exception("Porque men? detente");
 		}
-		if (!isset($info->data) || !$info->data) {
+		if(!isset($info->data) || !$info->data) {
 			throw new Exception("Falta data");
 		}
 	}
@@ -107,7 +111,7 @@ class validated extends Database {
 			$vali = $this->validateToken();
 			// $debug["validateToken"] = $vali;
 			// echo json_encode($debug);
-			if (isset($vali["err"]) || empty($vali["rows"]) || $vali["match"] !== true) {
+			if(isset($vali["err"]) || empty($vali["rows"]) || $vali["match"] !== true) {
 				$res["code"] = 401;
 			} else {
 				$res["code"] = 200;
@@ -123,6 +127,31 @@ class validated extends Database {
 		}
 
 	}
+	/**
+	 * @version 1.0.0
+	 */
+	private function valid_api_key(): void {
+		$hea = apache_request_headers();
+		if(!isset($hea["api_key"]) || empty($hea["api_key"])) {
+			throw new Exception("Seriedad por favor");
+		}
+		if($hea["api_key"] !== API_KEY) {
+			throw new Exception("Seriedad por favor");
+		}
+
+	}
+	function valid_res_api_key(): array {
+		$res = [];
+		try {
+			$this->valid_api_key();
+			$res["code"] = 200;
+			return $res;
+		} catch (\Throwable $th) {
+			$res["code"] = 401;
+			$res["Error"] = $th->getMessage();
+			return $res;
+		}
+	}
 	public function newToken($req_body): array {
 		$debug = [];
 		$res["code"] = 200;
@@ -134,13 +163,13 @@ class validated extends Database {
 			$db = $this->get_valid_user();
 			$debug["db"] = $db;
 
-			if (!$db || empty($db) || !isset($db[$this->cols["password"]])) {
+			if(!$db || empty($db) || !isset($db[$this->cols["password"]])) {
 				$res["code"] = 401;
 				$res["msg"] = "Usuario incorrecto";
 				$res["debug"] = $debug;
 				return $res;
 			}
-			if (!password_verify($req_body["password"], $db[$this->cols["password"]])) {
+			if(!password_verify($req_body["password"], $db[$this->cols["password"]])) {
 				$debug["password_verify"] = password_verify($req_body["password"], $db[$this->cols["password"]]);
 				$res["code"] = 401;
 				$res["msg"] = "Password incorrecto";
@@ -171,7 +200,7 @@ class validated extends Database {
 	}
 	private function get_valid_user(): array {
 		$debug = [];
-		$sql = "SELECT * FROM $this->main_table WHERE " . $this->cols["name"] . " = :name AND " . $this->cols["id"] . " = :id";
+		$sql = "SELECT * FROM $this->main_table WHERE ".$this->cols["name"]." = :name AND ".$this->cols["id"]." = :id";
 		$debug["sql"] = $sql;
 		$stm = $this->conn->prepare($sql);
 		$stm->bindParam(":name", $this->req_payload["name"]);
@@ -182,19 +211,19 @@ class validated extends Database {
 		return $db;
 	}
 	private function are_req_body_valid($req_body): void {
-		if (!isset($req_body) || !$req_body) {
+		if(!isset($req_body) || !$req_body) {
 			$this->debug["req_body"] = "is not set or is empty";
 			throw new Exception("Fail request");
 		}
-		if (!is_array($req_body)) {
+		if(!is_array($req_body)) {
 			$this->debug["req_body"] = "is not array";
 			throw new Exception("Fail request");
 		}
-		if (!isset($req_body["name"]) || !$req_body["name"]) {
+		if(!isset($req_body["name"]) || !$req_body["name"]) {
 			$this->debug["req_body"] = "name is not set or is empty";
 			throw new Exception("Fail request");
 		}
-		if (!isset($req_body["password"]) || !$req_body["password"]) {
+		if(!isset($req_body["password"]) || !$req_body["password"]) {
 			$this->debug["req_body"] = "password is not set or is empty";
 			throw new Exception("Fail request");
 		}
@@ -208,13 +237,13 @@ class validated extends Database {
 		// $debug["client_name"] = $data["name"];
 		// $debug["client_pass"] = $data["password"];
 		try {
-			if (!isset($data)) {
+			if(!isset($data)) {
 				$res["code"] = 401;
 				$res["msg"] = "missing data";
 				// $res["debug"] = $debug;
 				return $res;
 			}
-			if ($data["name"] == null || $data["password"] == null) {
+			if($data["name"] == null || $data["password"] == null) {
 				$res["code"] = 401;
 				$res["msg"] = "missing data";
 				// $res["debug"] = $debug;
@@ -229,7 +258,7 @@ class validated extends Database {
 			return $res;
 		} catch (\Throwable $th) {
 			$res["code"] = 500;
-			$res["msg"] = "error" . $th->getMessage();
+			$res["msg"] = "error".$th->getMessage();
 			// $res["debug"] = $debug;
 			return $res;
 		}
@@ -238,18 +267,18 @@ class validated extends Database {
 		try {
 			//code...
 			// $debug = [];
-			$debug = $this->conn->prepare("INSERT INTO $this->main_table (" . $this->cols["name"] . "," . $this->cols["password"] . ") VALUES (:name, :password)");
+			$debug = $this->conn->prepare("INSERT INTO $this->main_table (".$this->cols["name"].",".$this->cols["password"].") VALUES (:name, :password)");
 			$debug->bindParam(":name", $this->client_name);
 			$debug->bindParam(":password", $this->client_pass);
 			$debug->execute();
 			$last_id = $this->conn->lastInsertId();
-			$debug2 = $this->conn->prepare("SELECT " . $this->cols["name"] . " name, " . $this->cols["id"] . " id FROM $this->main_table WHERE " . $this->cols["id"] . " = :id");
+			$debug2 = $this->conn->prepare("SELECT ".$this->cols["name"]." name, ".$this->cols["id"]." id FROM $this->main_table WHERE ".$this->cols["id"]." = :id");
 			$debug2->bindParam(":id", $last_id);
 			$debug2->execute();
 			return $debug2->fetchAll(PDO::FETCH_ASSOC);
 		} catch (\Throwable $th) {
 			$res["code"] = 500;
-			$res["msg"] = "error" . $th->getMessage();
+			$res["msg"] = "error".$th->getMessage();
 			// $res["debug"] = $debug;
 			return $res;
 		}
@@ -272,13 +301,13 @@ class validated extends Database {
 
 		// Test insert
 		return;
-		$debug = $this->conn->prepare("INSERT INTO $this->main_table (" . $this->cols["name"] . "," . $this->cols["password"] . ") VALUES (:name, :password)");
+		$debug = $this->conn->prepare("INSERT INTO $this->main_table (".$this->cols["name"].",".$this->cols["password"].") VALUES (:name, :password)");
 		$debug->bindValue(":name", "test");
 		$pass = password_hash("test", PASSWORD_DEFAULT);
 		$debug->bindValue(":password", $pass);
 		$debug->execute();
 
-		$debug2 = $this->conn->prepare("SELECT * FROM $this->main_table WHERE " . $this->cols["id"] . " = :id");
+		$debug2 = $this->conn->prepare("SELECT * FROM $this->main_table WHERE ".$this->cols["id"]." = :id");
 		$debug2->bindValue(":id", $this->conn->lastInsertId());
 		$debug2->execute();
 		// echo json_encode($debug2->fetchAll(PDO::FETCH_ASSOC));
