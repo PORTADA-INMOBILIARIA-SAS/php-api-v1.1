@@ -1,9 +1,16 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
+if(isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] === 'on') {
+    $url = "https://";
+} else {
+    $url = "http://";
+}
+$url .= $_SERVER['HTTP_HOST'];
+$url .= $_SERVER["REQUEST_URI"];
 $modules = [
 	"test" => [
 		"terminacion de contratos" => [
-			"endpoint" => "http://10.1.1.8/api/v1/terminaciones/",
+			"endpoint" => "$url".'terminaciones/',
 			"suported params" => [
 				"query params" => [
 					"id" => "int",
@@ -14,7 +21,7 @@ $modules = [
 			]
 		],
 		"pqrs" => [
-			"endpoint" => "http://10.1.1.8/api/v1/pqrs/",
+			"endpoint" => "$url".'pqrs/',
 			"suported params" => [
 				"query params" => [
 					"id",
@@ -26,7 +33,7 @@ $modules = [
 		]
 	],
 	"dev" => [
-		"mantenimientos" => "http://10.1.1.8/api/v1/mantenimientos/",
+		"mantenimientos" => "$url".'mantenimientos/',
 	],
 	"env" => getenv("APPLICATION_ENVIRONMENT")
 ];
