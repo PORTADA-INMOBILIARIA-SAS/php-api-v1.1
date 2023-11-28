@@ -1,0 +1,8 @@
+*.un~
+*~
+.env
+*copy*
+vendor
+src/config/consts.php
+v1
+private*
