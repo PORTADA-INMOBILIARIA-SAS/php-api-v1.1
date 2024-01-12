@@ -68,7 +68,7 @@ switch ($method) {
 			// consulta por match
 			if (isset($_GET['search']) && !empty($_GET['search'])) {
 
-				$result = $api_REST->get_by_match($_GET['search']);
+				$result = $api_REST->get_by_match($_GET['search'], $limit_int, $page_int);
 				http_response_code($result["code"] ?? 500);
 
 				if (isset($result["debug"])) {
