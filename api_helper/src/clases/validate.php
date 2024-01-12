@@ -77,7 +77,7 @@ class validated extends Database {
 			if(count($token_arr) !== 2) {
 				throw new Exception("Ya wey por favor");
 			}
-			if($token_arr[0] !== "Baerer") {
+			if($token_arr[0] !== "Bearer") {
 				throw new Exception("porque buscas mi desgracia?");
 			}
 			$token = $token_arr[1];
