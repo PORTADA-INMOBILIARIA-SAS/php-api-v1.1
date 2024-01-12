@@ -77,7 +77,7 @@ class validated extends Database {
 			if(count($token_arr) !== 2) {
 				throw new Exception("Ya wey por favor");
 			}
-			if($token_arr[0] !== "Baerer") {
+			if($token_arr[0] !== "Bearer") {
 				throw new Exception("porque buscas mi desgracia?");
 			}
 			$token = $token_arr[1];
@@ -283,58 +283,4 @@ class validated extends Database {
 			return $res;
 		}
 	}
-	public function test() {
-		$debug = [];
-		// Test selct all
-		$debug = $this->conn->prepare("SELECT * FROM $this->main_table LIMIT 2");
-		$debug->execute();
-		$res = $debug->fetchAll(PDO::FETCH_ASSOC);
-		// var_dump($res);
-		echo json_encode(array("test data" => $res), JSON_FORCE_OBJECT);
-		// echo json_encode($res, JSON_UNESCAPED_UNICODE);
-
-		// Test select one
-		// $debug = $this->conn->prepare("SELECT * FROM $this->main_table WHERE " . $this->cols["id"] . " = :id");
-		// $debug->bindParam(":id", 1);
-		// $debug->execute();
-		// var_dump($debug->fetchAll(PDO::FETCH_ASSOC));
-
-		// Test insert
-		return;
-		$debug = $this->conn->prepare("INSERT INTO $this->main_table (".$this->cols["name"].",".$this->cols["password"].") VALUES (:name, :password)");
-		$debug->bindValue(":name", "test");
-		$pass = password_hash("test", PASSWORD_DEFAULT);
-		$debug->bindValue(":password", $pass);
-		$debug->execute();
-
-		$debug2 = $this->conn->prepare("SELECT * FROM $this->main_table WHERE ".$this->cols["id"]." = :id");
-		$debug2->bindValue(":id", $this->conn->lastInsertId());
-		$debug2->execute();
-		// echo json_encode($debug2->fetchAll(PDO::FETCH_ASSOC));
-		// var_dump($debug2->fetchAll(PDO::FETCH_ASSOC));
-
-		// Test update
-		// $debug = $this->conn->prepare("UPDATE $this->main_table SET name = :name, password = :password WHERE $this->id = :id");
-		// $debug->bindValue(":name", "john");
-		// $pass = password_hash("test", PASSWORD_DEFAULT);
-		// $debug->bindValue(":password", $pass);
-		// $debug->bindValue(":id", 1);
-		// $debug->execute();
-
-		// $debug2 = $this->conn->prepare("SELECT * FROM $this->main_table WHERE $this->id = :id");
-		// $debug2->bindValue(":id", 1);
-		// $debug2->execute();
-		// var_dump($debug2->fetchAll(PDO::FETCH_ASSOC));
-		return;
-	}
 }
-
-// $aa = new validated();
-
-// // var_dump($aa);
-// // echo "<br>";
-
-// $aaR = $aa->valid();
-
-// var_dump($aaR);
-// echo "<br>";

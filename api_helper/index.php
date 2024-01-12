@@ -21,12 +21,10 @@ require_once "src/clases/validate.php";
 require_once "src/api_final.php";
 
 $authorization = new validated();
-// $validated = $authorization->valid();
-$validated = $authorization->valid_res_api_key();
-// $debug["validated"] = $validated;
+$validated = $authorization->valid();
 if (!isset($validated) || !isset($validated["code"]) || $validated["code"] !== 200) {
 	$err["Unauthorized"] = "Bad getway";
-	$debug["Errors"][] = $err;
+	// $err["debug"] = $debug;
 	http_response_code($validated["code"] ?? 501);
 	echo json_encode($err, JSON_UNESCAPED_UNICODE);
 	//	echo json_encode($debug, JSON_UNESCAPED_UNICODE);
@@ -70,7 +68,7 @@ switch ($method) {
 			// consulta por match
 			if (isset($_GET['search']) && !empty($_GET['search'])) {
 
-				$result = $api_REST->get_by_match($_GET['search']);
+				$result = $api_REST->get_by_match($_GET['search'], $limit_int, $page_int);
 				http_response_code($result["code"] ?? 500);
 
 				if (isset($result["debug"])) {
@@ -241,6 +239,9 @@ switch ($method) {
 			echo json_encode($res, JSON_UNESCAPED_UNICODE);
 			return;
 		}
+		break;
+	case 'OPTIONS':
+		http_response_code(200);
 		break;
 
 	default:
