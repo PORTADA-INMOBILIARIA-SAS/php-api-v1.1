@@ -47,6 +47,3 @@ if (isset($_GET["new_token"]) && $_GET["new_token"] == "true") {
 	echo json_encode($debug, JSON_UNESCAPED_UNICODE);
 	return;
 }
-if (isset($_GET["test"]) && $_GET["test"] == "true") {
-	$authorization->test();
-}
